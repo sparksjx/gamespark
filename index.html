@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#1a1a2e" />
+  <meta name="description" content="Generate random game ideas, rate them, and save your favourites." />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="GameSpark" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="apple-touch-icon" href="icons/icon-192.png" />
+  <title>GameSpark</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:wght@400;500&display=swap');
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0f0f1a;
+      --surface: #1a1a2e;
+      --surface2: #22223b;
+      --accent: #7f77dd;
+      --accent2: #5dcaa5;
+      --gold: #ef9f27;
+      --text: #f0eefc;
+      --muted: #8888aa;
+      --border: rgba(127,119,221,0.2);
+      --radius: 16px;
+    }
+
+    html, body {
+      height: 100%;
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 16px;
+      line-height: 1.6;
+      overscroll-behavior: none;
+    }
+
+    .app {
+      max-width: 480px;
+      margin: 0 auto;
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      padding: 0 1rem 2rem;
+    }
+
+    header {
+      padding: 3rem 0 1.5rem;
+      text-align: center;
+    }
+
+    header h1 {
+      font-family: 'Syne', sans-serif;
+      font-size: 2rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    header p {
+      font-size: 13px;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 1.25rem;
+    }
+
+    .stat {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 12px;
+      text-align: center;
+    }
+
+    .stat-num {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--accent);
+    }
+
+    .stat-label {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 2px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .tags { display: flex; flex-wrap: wrap; gap: 6px; min-height: 28px; }
+
+    .tag {
+      font-size: 11px;
+      font-weight: 500;
+      padding: 3px 10px;
+      border-radius: 100px;
+      letter-spacing: 0.03em;
+    }
+
+    .tag-genre  { background: rgba(127,119,221,0.15); color: #afa9ec; border: 1px solid rgba(127,119,221,0.3); }
+    .tag-setting { background: rgba(93,202,165,0.12); color: #5dcaa5; border: 1px solid rgba(93,202,165,0.25); }
+    .tag-twist  { background: rgba(239,159,39,0.12); color: #fac775; border: 1px solid rgba(239,159,39,0.25); }
+
+    .idea-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: var(--text);
+      margin: 0.85rem 0 0.5rem;
+      line-height: 1.3;
+    }
+
+    .idea-desc {
+      font-size: 14px;
+      color: var(--muted);
+      line-height: 1.65;
+    }
+
+    .stars {
+      display: flex;
+      gap: 10px;
+      margin: 1.1rem 0 0;
+      cursor: pointer;
+    }
+
+    .star {
+      font-size: 28px;
+      color: var(--surface2);
+      transition: color 0.12s, transform 0.1s;
+      user-select: none;
+      line-height: 1;
+    }
+
+    .star.lit { color: var(--gold); }
+    .star:active { transform: scale(1.3); }
+
+    .btn-row {
+      display: flex;
+      gap: 10px;
+      margin-top: 1.1rem;
+    }
+
+    button {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      border-radius: 100px;
+      padding: 10px 20px;
+      cursor: pointer;
+      border: none;
+      transition: opacity 0.15s, transform 0.1s;
+      flex: 1;
+    }
+
+    button:active { transform: scale(0.97); }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent), #534ab7);
+      color: #fff;
+    }
+
+    .btn-secondary {
+      background: var(--surface2);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+
+    button:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+
+    .section-label {
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      margin-bottom: 0.75rem;
+    }
+
+    .saved-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 14px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      margin-bottom: 8px;
+    }
+
+    .saved-title {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text);
+    }
+
+    .saved-meta {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    .del-btn {
+      background: none;
+      border: none;
+      color: var(--muted);
+      font-size: 18px;
+      padding: 4px 8px;
+      cursor: pointer;
+      flex: unset;
+      border-radius: 8px;
+      transition: color 0.15s, background 0.15s;
+    }
+
+    .del-btn:hover { color: #e24b4a; background: rgba(226,75,74,0.1); }
+
+    .empty {
+      font-size: 13px;
+      color: var(--muted);
+      text-align: center;
+      padding: 1.5rem 0;
+    }
+
+    .animate-in {
+      animation: popIn 0.22s cubic-bezier(0.34,1.56,0.64,1);
+    }
+
+    @keyframes popIn {
+      from { opacity: 0; transform: translateY(10px) scale(0.97); }
+      to   { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .install-banner {
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      background: rgba(127,119,221,0.12);
+      border: 1px solid rgba(127,119,221,0.3);
+      border-radius: var(--radius);
+      padding: 12px 16px;
+      margin-bottom: 1rem;
+      font-size: 13px;
+      color: var(--text);
+    }
+
+    .install-banner.show { display: flex; }
+
+    .install-banner button {
+      background: var(--accent);
+      color: #fff;
+      flex: unset;
+      padding: 7px 16px;
+      font-size: 13px;
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <h1>GameSpark ⚡</h1>
+      <p>Random game ideas, rated &amp; saved</p>
+    </header>
+
+    <div id="install-banner" class="install-banner">
+      <span>Add to your home screen for the full app experience!</span>
+      <button id="install-btn">Install</button>
+    </div>
+
+    <div class="stats">
+      <div class="stat"><div class="stat-num" id="gen-count">0</div><div class="stat-label">Generated</div></div>
+      <div class="stat"><div class="stat-num" id="save-count">0</div><div class="stat-label">Saved</div></div>
+      <div class="stat"><div class="stat-num" id="avg-rating">—</div><div class="stat-label">Avg rating</div></div>
+    </div>
+
+    <div class="card" id="idea-card">
+      <div class="tags" id="tags-row"></div>
+      <p class="idea-title" id="idea-title">Tap "New idea" to begin</p>
+      <p class="idea-desc" id="idea-desc">Your random game concept will appear here. Rate it with stars, then save the ones you want to build!</p>
+      <div class="stars" id="stars-row">
+        <span class="star" data-v="1">★</span>
+        <span class="star" data-v="2">★</span>
+        <span class="star" data-v="3">★</span>
+        <span class="star" data-v="4">★</span>
+        <span class="star" data-v="5">★</span>
+      </div>
+      <div class="btn-row">
+        <button class="btn-primary" id="new-btn">⚡ New idea</button>
+        <button class="btn-secondary" id="save-btn" disabled>Save</button>
+      </div>
+    </div>
+
+    <div>
+      <div class="section-label">Saved ideas</div>
+      <div id="saved-container"><div class="empty">No saved ideas yet</div></div>
+    </div>
+  </div>
+
+  <script>
+    const genres   = ["Platformer","Puzzle","Tower Defense","RPG","Racing","Survival","Horror","Idle Clicker","Rhythm","Stealth","Battle Royale","Simulation"];
+    const settings = ["Underwater City","Space Station","Enchanted Forest","Post-Apocalyptic City","Inside a Computer","Ancient Egypt","Future Tokyo","Candy Kingdom","Haunted School","Pirate Island","Arctic Tundra","Dinosaur Park"];
+    const mechanics= ["collect coins","swap gravity","build shields","grow in size","freeze time","ride animals","hack robots","plant crops","shoot light beams","turn invisible","control weather","merge objects"];
+    const twists   = ["but you're tiny","but everything is on fire","but controls swap every 30s","but the map is upside down","but you can only move backwards","but you lose a life if you stand still","but you can only use one button","but the screen slowly shrinks"];
+    const adjectives=["Epic","Tiny","Cursed","Neon","Super","Mega","Sneaky","Frozen","Twisted","Hyper"];
+    const endings  = ["Adventure","Crisis","Showdown","Rush","Uprising","Escape","Quest","Strike"];
+
+    var currentIdea = null;
+    var currentRating = 0;
+    var savedIdeas = JSON.parse(localStorage.getItem('gamespark-saved') || '[]');
+    var genCount = parseInt(localStorage.getItem('gamespark-gencount') || '0');
+
+    function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+
+    function newIdea() {
+      var genre = pick(genres), setting = pick(settings), mechanic = pick(mechanics), twist = pick(twists);
+      var title = pick(adjectives) + " " + setting.split(" ")[0] + " " + pick(endings);
+      currentIdea = { genre, setting, mechanic, twist, title };
+      currentRating = 0;
+      genCount++;
+      localStorage.setItem('gamespark-gencount', genCount);
+
+      document.getElementById("idea-title").textContent = title;
+      document.getElementById("idea-desc").textContent = "A " + genre.toLowerCase() + " game set in a " + setting.toLowerCase() + ". Your goal: " + mechanic + " to win — " + twist + ".";
+      document.getElementById("tags-row").innerHTML =
+        '<span class="tag tag-genre">' + genre + '</span>' +
+        '<span class="tag tag-setting">' + setting + '</span>' +
+        '<span class="tag tag-twist">' + twist + '</span>';
+      document.getElementById("gen-count").textContent = genCount;
+      document.getElementById("save-btn").disabled = true;
+      renderStars(0);
+
+      var card = document.getElementById("idea-card");
+      card.classList.remove("animate-in");
+      void card.offsetWidth;
+      card.classList.add("animate-in");
+    }
+
+    function renderStars(rating) {
+      document.querySelectorAll(".star").forEach(function(s) {
+        parseInt(s.getAttribute("data-v")) <= rating ? s.classList.add("lit") : s.classList.remove("lit");
+      });
+    }
+
+    function saveIdea() {
+      if (!currentIdea || currentRating === 0) return;
+      savedIdeas.push({ title: currentIdea.title, genre: currentIdea.genre, rating: currentRating });
+      localStorage.setItem('gamespark-saved', JSON.stringify(savedIdeas));
+      document.getElementById("save-count").textContent = savedIdeas.length;
+      document.getElementById("save-btn").disabled = true;
+      updateAvg();
+      renderSaved();
+    }
+
+    function deleteIdea(idx) {
+      savedIdeas.splice(idx, 1);
+      localStorage.setItem('gamespark-saved', JSON.stringify(savedIdeas));
+      document.getElementById("save-count").textContent = savedIdeas.length;
+      updateAvg();
+      renderSaved();
+    }
+
+    function updateAvg() {
+      if (!savedIdeas.length) { document.getElementById("avg-rating").textContent = "—"; return; }
+      var avg = savedIdeas.reduce(function(s,i){ return s + i.rating; }, 0) / savedIdeas.length;
+      document.getElementById("avg-rating").textContent = avg.toFixed(1);
+    }
+
+    function renderSaved() {
+      var c = document.getElementById("saved-container");
+      if (!savedIdeas.length) { c.innerHTML = '<div class="empty">No saved ideas yet</div>'; return; }
+      c.innerHTML = savedIdeas.map(function(idea, i) {
+        var stars = "";
+        for (var s = 1; s <= 5; s++) stars += s <= idea.rating ? "★" : "☆";
+        return '<div class="saved-item"><div><div class="saved-title">' + idea.title + '</div><div class="saved-meta">' + idea.genre + ' &nbsp;·&nbsp; ' + stars + '</div></div><button class="del-btn" onclick="deleteIdea(' + i + ')" aria-label="Remove">✕</button></div>';
+      }).join("");
+    }
+
+    document.getElementById("new-btn").addEventListener("click", newIdea);
+    document.getElementById("save-btn").addEventListener("click", saveIdea);
+    document.getElementById("stars-row").addEventListener("click", function(e) {
+      if (!currentIdea) return;
+      var star = e.target.closest(".star");
+      if (!star) return;
+      currentRating = parseInt(star.getAttribute("data-v"));
+      renderStars(currentRating);
+      document.getElementById("save-btn").disabled = false;
+    });
+
+    updateAvg();
+    renderSaved();
+    document.getElementById("save-count").textContent = savedIdeas.length;
+    document.getElementById("gen-count").textContent = genCount;
+
+    var deferredPrompt;
+    window.addEventListener('beforeinstallprompt', function(e) {
+      e.preventDefault();
+      deferredPrompt = e;
+      document.getElementById('install-banner').classList.add('show');
+    });
+    document.getElementById('install-btn').addEventListener('click', function() {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then(function() {
+          document.getElementById('install-banner').classList.remove('show');
+          deferredPrompt = null;
+        });
+      }
+    });
+
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js');
+    }
+  </script>
+</body>
+</html>
