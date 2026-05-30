@@ -2,7 +2,7 @@
   "name": "GameSpark — Game Idea Generator",
   "short_name": "GameSpark",
   "description": "Generate random game ideas, rate them, and save your favourites.",
-  "start_url": "/",
+  "start_url": "/gamespark/",
   "display": "standalone",
   "background_color": "#0f0f1a",
   "theme_color": "#1a1a2e",
